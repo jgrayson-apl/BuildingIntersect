@@ -1,0 +1,27 @@
+{
+  "title": "Find Nearby Buildings & Points of Interest",
+  "appid": "",
+  "group": "",
+  "webmap": "a4890e91e0b74c508626028ac320a850",
+  "webscene": "",
+  "portalUrl": "https://www.arcgis.com",
+  "oauthappid": "bBBSpHGAr1v5LeSw",
+  "proxyUrl": "https://apl.esri.com/proxy/DotNet/proxy.ashx",
+  "units": "dual",
+  "helperServices": {
+    "geometry": {
+      "url": null
+    },
+    "printTask": {
+      "url": null
+    },
+    "elevationSync": {
+      "url": null
+    },
+    "geocode": [
+      {
+        "url": null
+      }
+    ]
+  }
+}

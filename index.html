@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- Responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <!-- End Responsive -->
+    <link rel="icon" href="./assets/favicon.ico" sizes="32x32" type="image/vnd.microsoft.icon">
+    <link rel="stylesheet" href="https://s3-us-west-1.amazonaws.com/patterns.esri.com/files/calcite-web/1.2.5/css/calcite-web.min.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/css/main.css">
+    <link rel="stylesheet" href="./styles/main.css">
+    <script src="./app/dojo.js"></script>
+    <script src="https://js.arcgis.com/4.14/"></script>
+    <script>require(["Application/init"]);</script>
+  </head>
+  <body class="configurable-application--loading">
+
+    <!-- DETAILS -->
+    <div class="js-modal modal-overlay" data-modal="app-details-dialog">
+      <div class="modal-content column-14" aria-labelledby="modal" role="dialog">
+        <span class="js-modal-toggle esri-interactive icon-ui-close right" aria-label="close-modal"></span>
+        <h3 class="trailer-half text-blue">Find Nearby Buildings</h3>
+        <div class="panel trailer-half">
+          Find nearby buildings from a location or along a path.
+          <ul class="trailer-0">
+            <li>
+              <a href="https://www.arcgis.com/home/item.html?id=bb69f10baf334d4c935a0fb23d758f38" target="_blank">
+                Microsoft US Building Footprints
+              </a>
+            </li>
+            <li>
+              <a href="https://developers.arcgis.com/features/geocoding/#search-for-places" target="_blank">
+                ArcGIS World Geocoding Service
+              </a>
+            </li>
+          </ul>
+        </div>
+        <img src="./assets/esri_science_of_where.png" class="left">
+        <div class="text-right">
+          <button class="btn js-modal-toggle">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER ZIP CODE -->
+    <div id="zip-code-dialog" class="js-modal modal-overlay" data-modal="zip-code-dialog">
+      <div class="modal-content column-9" aria-labelledby="modal" role="dialog">
+        <span class="js-modal-toggle esri-interactive icon-ui-close icon-ui-blue right" title="close" aria-label="close-modal"></span>
+        <h3 class="text-blue trailer-half">Find Your Zip Code</h3>
+        <label>
+          Enter 5-digit ZIP Code: <input id="user-zip-input" pattern="(\d{5}([\-]\d{4})?)" placeholder="your zip code here  (example: 92373)" tabindex="1">
+        </label>
+        <div class="text-right">
+          <button id="zip-code-dialog-ok" class="btn btn-disabled js-modal-toggle">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP NAVIGATION -->
+    <header id="header-panel" class="panel panel-blue panel-no-padding panel-no-border padding-left-1 padding-right-1">
+      <!-- APP TITLE -->
+      <span id="app-title-node" class="top-nav-title text-white"></span>
+
+      <!-- MAP AND CONTENT -->
+      <nav class="top-nav-list" role="navigation" aria-labelledby="topnav">
+        <span class="top-nav-link esri-interactive js-modal-toggle text-white icon-ui-map-pin margin-left-3" data-modal="zip-code-dialog">Zip Code</span>
+      </nav>
+      <!-- RIGHT ALIGNED -->
+      <nav class="top-nav-list right" role="navigation">
+
+        <!-- SIGN IN NODE -->
+        <span id="sign-in-node" class="top-nav-link text-white esri-interactive icon-ui-user margin-left-1">Sign In</span>
+
+        <!-- USER NODE -->
+        <div id="user-node" class="dropdown js-dropdown margin-left-1 text-white hide">
+          <span class="top-nav-link icon-ui-user text-white margin-left-1 esri-interactive js-dropdown-toggle" tabindex="0" aria-haspopup="true" aria-expanded="false">
+            <span id="user-firstname-node"></span>
+          </span>
+          <nav class="dropdown-menu dropdown-right" role="menu">
+            <span class="dropdown-title">
+              <span id="user-fullname-node"></span>
+              <br>
+              <img id="user-thumb-node" src="">
+              <small><span id="username-node"></span></small>
+            </span>
+            <!--<a href="https://developers.arcgis.com/community/support" target="_blank" class="dropdown-link icon-ui-support" role="menu-item">Support</a>-->
+            <!--<a href="https://developers.arcgis.com/feedback/" target="_blank" class="dropdown-link icon-ui-link-external" role="menu-item">Feedback</a>-->
+            <span id="sign-out-node" class="dropdown-link esri-interactive icon-ui-sign-out" role="menu-item">Sign Out</span>
+          </nav>
+        </div>
+
+        <!-- APP DETAILS -->
+        <span class="top-nav-link icon-ui-description text-white js-modal-toggle margin-left-1 esri-interactive" data-modal="app-details-dialog"></span>
+
+      </nav>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <div id="main-container">
+      <div id="left-container" class="panel panel-white panel-no-border column-6">
+
+        <div class="panel trailer-half">
+
+          <div class="font-size-1 text-blue avenir-demi trailer-quarter">
+            Analysis Location
+            <button id="clear-btn" class="btn-link font-size--3 leader-quarter right" title="clear analysis results">clear</button>
+          </div>
+
+          <div class="panel panel-no-padding panel-no-border padding-leader-quarter text-center trailer-half">
+            <button id="location-btn" class="btn icon-ui-map-pin" title="Click or drag pointer on the view...">location</button>
+            <span title="Sign-in to enable this option. Note: consumes 0.005 credits per route using the ArcGIS World Routing Service...">
+              <button id="path-btn" class="btn icon-ui-directions btn-disabled">path</button>
+            </span>
+            <button id="play-btn" class="btn icon-ui-play icon-ui-flush btn-disabled"></button>
+          </div>
+          <div class="font-size--1">
+            <span>search distance:&nbsp;</span>
+            <span id="search-distance-label" class="avenir-demi">200</span>
+            <span>&nbsp;meters</span>
+          </div>
+          <input id="search-distance-input" class="" type="range" min="50" max="250" step="10" value="150">
+        </div>
+
+        <div class="panel">
+          <div class="font-size-1 text-blue avenir-demi trailer-quarter">
+            Buildings
+          </div>
+          <div class="panel panel-blue">
+            <div class="text-center">within the view extent</div>
+            <div id="buildings-count-label" class="text-center font-size-3">0</div>
+            <div class="text-center">within the search distance</div>
+            <div id="footprints-count-label" class="text-center font-size-3">0</div>
+            <div class="text-center">intersecting search area</div>
+            <div id="visibility-count-label" class="text-center font-size-5">0</div>
+          </div>
+        </div>
+
+        <div class="panel leader-quarter">
+          <div class="font-size-1 text-blue avenir-demi trailer-quarter">
+            Points of Interest
+          </div>
+          <div class="panel panel-blue">
+            <div class="text-center">within the view extent</div>
+            <div id="poi-count-extent-label" class="text-center font-size-3">0</div>
+            <div class="text-center">within the search distance</div>
+            <div id="poi-count-aoi-label" class="text-center font-size-3">0</div>
+            <div class="text-center">intersecting search area</div>
+            <div id="poi-count-visible-label" class="text-center font-size-5">0</div>
+          </div>
+        </div>
+
+      </div>
+      <div id="view-container"></div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="notifications-node"></div>
+
+  </body>
+</html>
